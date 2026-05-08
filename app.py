@@ -13,7 +13,7 @@ else:
     st.error("⚠️ API Key tidak ditemukan di Secrets Streamlit Cloud.")
     st.stop()
 
-# MENGGUNAKAN MODEL YANG BERHASIL DITEST: gemini-2.5-flash
+# MENGGUNAKAN MODEL YANG BERHASIL DITEST
 MODEL_NAME = 'models/gemini-2.5-flash'
 model = genai.GenerativeModel(MODEL_NAME)
 
@@ -47,33 +47,33 @@ with col_display:
     if submitted:
         if name and logs and evidence:
             with st.spinner("AI sedang menganalisis data historis sesuai rubrik TRACER..."):
-              # LOGIKA PROMPT (Sesuai Desain Bab 3)
-            prompt = f"""
-            You are an expert Course Lecturer. 
-            Evaluate the following student contribution based on the TRACER-AI Analytic Rubric.
+                # LOGIKA PROMPT - Perhatikan Indentasi/Spasi di bawah ini!
+                prompt = f"""
+                You are an expert Course Lecturer. 
+                Evaluate the following student contribution based on the TRACER-AI Analytic Rubric.
 
-            STUDENT DATA:
-            Name: {name}
-            Role: {role}
-            Timeframe: {week}
-            Activity Log: {logs}
-            Evidence Artifact: {evidence}
+                STUDENT DATA:
+                Name: {name}
+                Role: {role}
+                Timeframe: {week}
+                Activity Log: {logs}
+                Evidence Artifact: {evidence}
 
-            EVALUATION CRITERIA (TRACER Pillars):
-            1. Transparent (T): Clarity of roles and workflow visibility.
-            2. Real-time (R): Consistency of progress and responsiveness.
-            3. Accountable (A): Alignment between claims and evidence.
+                EVALUATION CRITERIA (TRACER Pillars):
+                1. Transparent (T): Clarity of roles and workflow visibility.
+                2. Real-time (R): Consistency of progress and responsiveness.
+                3. Accountable (A): Alignment between claims and evidence.
 
-            OUTPUT REQUIREMENT:
-            1. MANDATORY OPENING: Start your response with exactly this sentence: 
-               "As Your Lecturer, I have evaluated {name}'s contribution for {week} based on the TRACER-AI Analytic Rubric."
-            2. Provide a SCORE (0-100) for each pillar in a Markdown Table.
-            3. Determine the CATEGORY (Very Good, Good, Fair, or Poor).
-            4. Write a 'HISTORICAL DESCRIPTION' summary (max 150 words).
-            5. FREE-RIDER DETECTION: Identify if the student is a genuine contributor or a free-rider.
-            
-            Please format the response using professional academic tone.
-            """
+                OUTPUT REQUIREMENT:
+                1. MANDATORY OPENING: Start your response with exactly this sentence: 
+                   "As Your Lecturer, I have evaluated {name}'s contribution for {week} based on the TRACER-AI Analytic Rubric."
+                2. Provide a SCORE (0-100) for each pillar in a Markdown Table.
+                3. Determine the CATEGORY (Very Good, Good, Fair, or Poor).
+                4. Write a 'HISTORICAL DESCRIPTION' summary (max 150 words).
+                5. FREE-RIDER DETECTION: Identify if the student is a genuine contributor or a free-rider.
+                
+                Please format the response using professional academic tone.
+                """
                 
                 try:
                     response = model.generate_content(prompt)
@@ -81,9 +81,9 @@ with col_display:
                     st.markdown("---")
                     st.markdown(response.text)
                 except Exception as e:
-                    st.error(f"Gagal memproses data dengan model {MODEL_NAME}: {e}")
+                    st.error(f"Gagal memproses data: {e}")
         else:
-            st.warning("Mohon lengkapi Nama, Log Aktivitas, dan Link Bukti untuk memulai analisis.")
+            st.warning("Mohon lengkapi Nama, Log Aktivitas, dan Link Bukti.")
     else:
         st.info("Dashboard ini akan menampilkan analisis otomatis AI setelah mahasiswa mengirimkan data.")
 
