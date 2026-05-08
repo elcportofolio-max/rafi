@@ -14,7 +14,7 @@ else:
     st.stop()
 
 # --- PERBAIKAN DI SINI: MENGGUNAKAN GEMINI 1.5 FLASH ---
-model = genai.GenerativeModel('gemini-1.5-flash')
+model = genai.GenerativeModel('models/gemini-1.5-flash') 
 
 # --- 3. ANTARMUKA PENGGUNA (UI) ---
 st.title("🛡️ TRACER-AI Framework Dashboard")
