@@ -10,13 +10,28 @@ if "GEMINI_API_KEY" in st.secrets:
     api_key = st.secrets["GEMINI_API_KEY"]
     genai.configure(api_key=api_key)
 else:
-    st.error("API Key tidak ditemukan di Secrets.")
+    st.error("⚠️ API Key tidak ditemukan di Secrets Streamlit Cloud.")
     st.stop()
 
-# --- PERBAIKAN DI SINI: MENGGUNAKAN GEMINI 1.5 FLASH ---
-model = genai.GenerativeModel('models/gemini-1.5-flash') 
+# --- 3. PENCARIAN MODEL OTOMATIS (SOLUSI 404) ---
+@st.cache_resource
+def load_model():
+    # Mencoba daftar model yang paling umum didukung
+    model_options = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro']
+    for m_name in model_options:
+        try:
+            m = genai.GenerativeModel(m_name)
+            # Test kecil untuk memastikan model bisa merespon
+            m.generate_content("test", generation_config={"max_output_tokens": 1})
+            return m
+        except:
+            continue
+    st.error("Semua model AI gagal dihubungi. Periksa kuota API Key Anda.")
+    return None
 
-# --- 3. ANTARMUKA PENGGUNA (UI) ---
+model = load_model()
+
+# --- 4. ANTARMUKA PENGGUNA (UI) ---
 st.title("🛡️ TRACER-AI Framework Dashboard")
 st.markdown("### *Transparent, Real-time, Accountable Collaborative Evaluation Record*")
 st.caption("Prototype Penelitian R&D - Program Doktor Pendidikan Bahasa Inggris")
@@ -38,30 +53,21 @@ with col_input:
 with col_display:
     st.header("🔍 Lecturer Dashboard")
     if submitted:
-        if name and logs:
-            with st.spinner("AI sedang menganalisis data sesuai rubrik TRACER..."):
-                # PROMPT ENGINEERING
+        if name and logs and evidence:
+            with st.spinner("AI sedang menganalisis data..."):
                 prompt = f"""
-                You are a professor assistant. Evaluate this student contribution using TRACER-AI Rubric.
-                NAME: {name}
-                ROLE: {role}
-                LOG: {logs}
-                EVIDENCE: {evidence}
-                
-                Provide:
-                1. Scores (0-100) for Transparency, Real-time, and Accountability.
-                2. A "Historical Description" analysis.
-                3. Identify if this student is a "Free-rider" or not.
-                Format result in a clean Table and bullet points.
+                Evaluate this student contribution based on TRACER-AI Rubric:
+                NAME: {name} | ROLE: {role} | LOG: {logs} | EVIDENCE: {evidence}
+                Provide score (0-100), Category, and Historical Description.
                 """
                 try:
                     response = model.generate_content(prompt)
                     st.success(f"Analisis Selesai!")
                     st.markdown(response.text)
                 except Exception as e:
-                    st.error(f"Gagal menghubungi AI: {e}")
+                    st.error(f"Gagal memproses data: {e}")
         else:
-            st.warning("Mohon isi Nama dan Log.")
+            st.warning("Mohon lengkapi Nama, Log, dan Evidence.")
 
 st.divider()
 st.caption("TRACER-AI Framework - Research Prototype 2026")
