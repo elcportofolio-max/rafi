@@ -47,31 +47,33 @@ with col_display:
     if submitted:
         if name and logs and evidence:
             with st.spinner("AI sedang menganalisis data historis sesuai rubrik TRACER..."):
-                # LOGIKA PROMPT (Sesuai Desain Bab 3)
-                prompt = f"""
-                You are a Senior Professor specializing in Instructional Design and Assessment. 
-                Evaluate the following student contribution based on the TRACER-AI Analytic Rubric.
+              # LOGIKA PROMPT (Sesuai Desain Bab 3)
+            prompt = f"""
+            You are an expert Course Lecturer. 
+            Evaluate the following student contribution based on the TRACER-AI Analytic Rubric.
 
-                STUDENT DATA:
-                Name: {name}
-                Role: {role}
-                Timeframe: {week}
-                Activity Log: {logs}
-                Evidence Artifact: {evidence}
+            STUDENT DATA:
+            Name: {name}
+            Role: {role}
+            Timeframe: {week}
+            Activity Log: {logs}
+            Evidence Artifact: {evidence}
 
-                EVALUATION CRITERIA (TRACER Pillars):
-                1. Transparent (T): Clarity of roles and workflow visibility.
-                2. Real-time (R): Consistency of progress and responsiveness.
-                3. Accountable (A): Alignment between claims and evidence.
+            EVALUATION CRITERIA (TRACER Pillars):
+            1. Transparent (T): Clarity of roles and workflow visibility.
+            2. Real-time (R): Consistency of progress and responsiveness.
+            3. Accountable (A): Alignment between claims and evidence.
 
-                OUTPUT REQUIREMENT:
-                1. Provide a SCORE (0-100) for each pillar.
-                2. Determine the CATEGORY (Very Good, Good, Fair, or Poor).
-                3. Write a 'HISTORICAL DESCRIPTION' summary (max 150 words).
-                4. FREE-RIDER DETECTION: Analyze if the student is a genuine contributor or a free-rider.
-                
-                Please format the response using professional Markdown with a Table for scores.
-                """
+            OUTPUT REQUIREMENT:
+            1. MANDATORY OPENING: Start your response with exactly this sentence: 
+               "As Your Lecturer, I have evaluated {name}'s contribution for {week} based on the TRACER-AI Analytic Rubric."
+            2. Provide a SCORE (0-100) for each pillar in a Markdown Table.
+            3. Determine the CATEGORY (Very Good, Good, Fair, or Poor).
+            4. Write a 'HISTORICAL DESCRIPTION' summary (max 150 words).
+            5. FREE-RIDER DETECTION: Identify if the student is a genuine contributor or a free-rider.
+            
+            Please format the response using professional academic tone.
+            """
                 
                 try:
                     response = model.generate_content(prompt)
