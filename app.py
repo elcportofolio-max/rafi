@@ -1,73 +1,35 @@
 import streamlit as st
 import google.generativeai as genai
-import os
 
-# --- 1. KONFIGURASI HALAMAN ---
-st.set_page_config(page_title="TRACER-AI Framework Dashboard", layout="wide")
+st.set_page_config(page_title="TRACER-AI Diagnostic", layout="wide")
 
-# --- 2. KONEKSI API ---
-if "GEMINI_API_KEY" in st.secrets:
+st.title("🛡️ TRACER-AI Diagnostic Mode")
+
+# 1. Cek Koneksi Secrets
+if "GEMINI_API_KEY" not in st.secrets:
+    st.error("❌ Secrets tidak terbaca di Streamlit Cloud!")
+else:
     api_key = st.secrets["GEMINI_API_KEY"]
     genai.configure(api_key=api_key)
-else:
-    st.error("⚠️ API Key tidak ditemukan di Secrets Streamlit Cloud.")
-    st.stop()
+    
+    st.success("✅ API Key ditemukan di Secrets.")
 
-# --- 3. PENCARIAN MODEL OTOMATIS (SOLUSI 404) ---
-@st.cache_resource
-def load_model():
-    # Mencoba daftar model yang paling umum didukung
-    model_options = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro']
-    for m_name in model_options:
+    # 2. Test Koneksi Langsung ke Model Terbaru
+    st.subheader("Test Koneksi AI")
+    if st.button("Klik untuk Test Koneksi"):
         try:
-            m = genai.GenerativeModel(m_name)
-            # Test kecil untuk memastikan model bisa merespon
-            m.generate_content("test", generation_config={"max_output_tokens": 1})
-            return m
-        except:
-            continue
-    st.error("Semua model AI gagal dihubungi. Periksa kuota API Key Anda.")
-    return None
-
-model = load_model()
-
-# --- 4. ANTARMUKA PENGGUNA (UI) ---
-st.title("🛡️ TRACER-AI Framework Dashboard")
-st.markdown("### *Transparent, Real-time, Accountable Collaborative Evaluation Record*")
-st.caption("Prototype Penelitian R&D - Program Doktor Pendidikan Bahasa Inggris")
+            # Kita paksa pakai 1.5 Flash karena ini yang paling stabil untuk Free Tier
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            response = model.generate_content("Hello, are you active?")
+            st.balloons()
+            st.write("### 🚀 BERHASIL! AI Merespon:")
+            st.info(response.text)
+            st.write("Sekarang Anda bisa memasukkan kembali kode Dashboard TRACER-AI yang lengkap.")
+        except Exception as e:
+            st.error("⚠️ Error Asli dari Google detected:")
+            st.code(str(e)) # Ini akan memunculkan kode error yang sebenarnya
+            st.info("Jika muncul 'API_KEY_INVALID', berarti kunci Anda salah salin.")
+            st.info("Jika muncul 'User location not supported', berarti server Streamlit butuh VPN (tapi jarang terjadi).")
 
 st.divider()
-
-col_input, col_display = st.columns([1, 2])
-
-with col_input:
-    st.header("📝 Student Portal")
-    with st.form("input_form"):
-        name = st.text_input("Nama Lengkap Mahasiswa")
-        role = st.selectbox("Peran dalam Proyek", ["Lead Writer", "Researcher", "Designer", "Editor", "Coordinator"])
-        week = st.selectbox("Minggu Pengerjaan", ["Week 12", "Week 13", "Week 14", "Week 15"])
-        logs = st.text_area("Log Aktivitas Mingguan", height=150)
-        evidence = st.text_input("Link Bukti/Artifact")
-        submitted = st.form_submit_button("Kirim ke TRACER-AI")
-
-with col_display:
-    st.header("🔍 Lecturer Dashboard")
-    if submitted:
-        if name and logs and evidence:
-            with st.spinner("AI sedang menganalisis data..."):
-                prompt = f"""
-                Evaluate this student contribution based on TRACER-AI Rubric:
-                NAME: {name} | ROLE: {role} | LOG: {logs} | EVIDENCE: {evidence}
-                Provide score (0-100), Category, and Historical Description.
-                """
-                try:
-                    response = model.generate_content(prompt)
-                    st.success(f"Analisis Selesai!")
-                    st.markdown(response.text)
-                except Exception as e:
-                    st.error(f"Gagal memproses data: {e}")
-        else:
-            st.warning("Mohon lengkapi Nama, Log, dan Evidence.")
-
-st.divider()
-st.caption("TRACER-AI Framework - Research Prototype 2026")
+st.caption("TRACER-AI Framework Tool Diagnostic")
